@@ -4,7 +4,7 @@ class GameOfLife:
     width = 0
 
     def __init__(self, length, width, starting_cells):
-        self.surrounding_array = [(-1, 1), (0, 1), (1, 1), (-1, 0), (1, 0), (-1, -1), (0, -1), (1, -1)]
+        self.radius = 1
         self.length = length
         self.width = width
         self.alive_cells = starting_cells
@@ -16,13 +16,16 @@ class GameOfLife:
     def set_game_van_neumann(self):
         self.surrounding_array = [(-1, 1), (0, 1), (1, 1), (-1, 0), (1, 0), (-1, -1), (0, -1), (1, -1)]
 
-    def get_surrounding_cells(self, cell):
-        surrounding_cells = []
+    def get_surrounding_cells(self, cell, radius):
+        surrounding_cells = set()
 
-        for s_cell in self.surrounding_array:
+        size = (radius * 2) + 1
+
+        for i in range(size ** 2):
+            s_cell = (((i % size) - radius), (radius - (i // size)))
             result = (s_cell[0] + cell[0], s_cell[1] + cell[1])
             if (result[0] > -1 and result[0] < self.width and result[1] > -1 and result[1] < self.length):
-                surrounding_cells.append(result)
+                surrounding_cells.add(result)
         
         return surrounding_cells
 
@@ -32,7 +35,7 @@ class GameOfLife:
 
         for cell in self.alive_cells:
 
-            surrounding_cells = self.get_surrounding_cells(cell)
+            surrounding_cells = self.get_surrounding_cells(cell, self.radius)
 
             for cell in surrounding_cells:
                 if (cell in score_dict):
@@ -55,8 +58,6 @@ class GameOfLife:
                 elif (cell in self.alive_cells):
                     next_alive_cells.add(cell)
 
-
-        print(f"get_next_alive_cells next_alive_cells : {next_alive_cells}")
 
         self.alive_cells = next_alive_cells
 

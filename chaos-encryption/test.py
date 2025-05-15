@@ -108,23 +108,27 @@ def get_bitmask_overlaps(centerPoint1, centerpoint2, cover1, cover2, radius):
 def are_compatible(config1, config2, bitmask1, bitmask2):
     config1 = int(config1, 2) if isinstance(config1, str) else config1
     config2 = int(config2, 2) if isinstance(config2, str) else config2
+
     bitmask1 = int(bitmask1, 2) if isinstance(bitmask1, str) else bitmask1
     bitmask2 = int(bitmask2, 2) if isinstance(bitmask2, str) else bitmask2
 
     masked_config1 = config1 & bitmask1
     masked_config2 = config2 & bitmask2
 
-    # Normalize the bits for comparison
-    bit_count1 = bin(bitmask1).count('1')
-    bit_count2 = bin(bitmask2).count('1')
+    def msb_pos(n):
+        if n != 0:
+            return n.bit_length() - 1
+        return -1
 
-    normalized1 = masked_config1 >> (bitmask1.bit_length() - bit_count1)
-    normalized2 = masked_config2 >> (bitmask2.bit_length() - bit_count2)
+    shift1 = msb_pos(bitmask1)
+    shift2 = msb_pos(bitmask2)
 
-    # Compare normalized values
-    return normalized1 == normalized2
+    if shift1 > shift2:
+        masked_config2 <<= (shift1 - shift2)
+    elif shift2 > shift1:
+        masked_config1 <<= (shift2 - shift1)
 
-
+    return masked_config1 == masked_config2
 
 # config1 = "0b111000000"
 # config2 = "0b000000000"
